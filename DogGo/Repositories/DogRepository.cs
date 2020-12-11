@@ -39,7 +39,9 @@ namespace DogGo.Repositories
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
                             Name = reader.GetString(reader.GetOrdinal("Name")),
                             OwnerId = reader.GetInt32(reader.GetOrdinal("OwnerId")),
-                            Breed = reader.GetString(reader.GetOrdinal("Breed"))
+                            Breed = reader.GetString(reader.GetOrdinal("Breed")),
+                            Notes=Utilities.ReaderUtil.GetNullableString(reader,"Notes"),
+                            ImageUrl=Utilities.ReaderUtil.GetNullableString(reader, "ImageUrl")
                         };
                         dogs.Add(dog);
                     }
@@ -66,7 +68,9 @@ namespace DogGo.Repositories
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
                             Name = reader.GetString(reader.GetOrdinal("Name")),
                             OwnerId = reader.GetInt32(reader.GetOrdinal("OwnerId")),
-                            Breed = reader.GetString(reader.GetOrdinal("Breed"))
+                            Breed = reader.GetString(reader.GetOrdinal("Breed")),
+                            Notes = Utilities.ReaderUtil.GetNullableString(reader, "Notes"),
+                            ImageUrl = Utilities.ReaderUtil.GetNullableString(reader, "ImageUrl")
                         };
                         reader.Close();
                         return dog;
