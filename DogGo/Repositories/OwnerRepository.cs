@@ -9,9 +9,11 @@ namespace DogGo.Repositories
     public class OwnerRepository: IOwnerRepository
     {
         private readonly IConfiguration _config;
+        private NeighborhoodRepository _neiborhoodrepo;
         public OwnerRepository(IConfiguration config)
         {
             _config = config;
+            _neiborhoodrepo = new NeighborhoodRepository(config);
         }
         public SqlConnection Connection
         {
@@ -27,22 +29,18 @@ namespace DogGo.Repositories
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = "SELECT o.Id AS ownerId, o.Name AS ownerName, Email, Address, Phone, n.Name AS NeighborName, n.Id AS NeighborId FROM Owner o LEFT JOIN Neighborhood n ON o.NeighborhoodId=n.Id";
+                    cmd.CommandText = "SELECT * FROM Owner";
                     SqlDataReader reader = cmd.ExecuteReader();
                     List<Owner> owners = new List<Owner>();
                     while (reader.Read())
                     {
                         Owner owner = new Owner
                         {
-                            id = reader.GetInt32(reader.GetOrdinal("ownerId")),
+                            id = reader.GetInt32(reader.GetOrdinal("Id")),
                             Email = reader.GetString(reader.GetOrdinal("Email")),
-                            Name = reader.GetString(reader.GetOrdinal("ownerName")),
+                            Name = reader.GetString(reader.GetOrdinal("Name")),
                             Address = reader.GetString(reader.GetOrdinal("Address")),
-                            Neighborhood = new Neighborhood
-                            {
-                                Id = reader.GetInt32(reader.GetOrdinal("NeighborId")),
-                                Name = reader.GetString(reader.GetOrdinal("NeighborName"))
-                            },
+                            Neighborhood = _neiborhoodrepo.GetNeighborhoodById(reader.GetInt32(reader.GetOrdinal("NeighborhoodId"))),
                             Phone = reader.GetString(reader.GetOrdinal("Phone"))
                         };
                         owners.Add(owner);
@@ -60,22 +58,19 @@ namespace DogGo.Repositories
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @"SELECT o.Id AS ownerId, o.Name AS ownerName, Email, Address, Phone, n.Name AS NeighborName, n.Id AS NeighborId FROM Owner o LEFT JOIN Neighborhood n ON o.NeighborhoodId=n.Id WHERE o.Id=@id";
+                    cmd.CommandText = @"SELECT * 
+                                        FROM Owner WHERE Id=@id";
                     cmd.Parameters.AddWithValue("@id", id);
                     SqlDataReader reader = cmd.ExecuteReader();
                     if (reader.Read())
                     {
                         Owner owner = new Owner
                         {
-                            id = reader.GetInt32(reader.GetOrdinal("ownerId")),
+                            id = reader.GetInt32(reader.GetOrdinal("Id")),
                             Email = reader.GetString(reader.GetOrdinal("Email")),
-                            Name = reader.GetString(reader.GetOrdinal("ownerName")),
+                            Name = reader.GetString(reader.GetOrdinal("Name")),
                             Address = reader.GetString(reader.GetOrdinal("Address")),
-                            Neighborhood = new Neighborhood
-                            {
-                                Id = reader.GetInt32(reader.GetOrdinal("NeighborId")),
-                                Name = reader.GetString(reader.GetOrdinal("NeighborName"))
-                            },
+                            Neighborhood = _neiborhoodrepo.GetNeighborhoodById(reader.GetInt32(reader.GetOrdinal("NeighborhoodId"))),
                             Phone = reader.GetString(reader.GetOrdinal("Phone"))
                         };
                         reader.Close();

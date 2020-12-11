@@ -8,11 +8,13 @@ namespace DogGo.Repositories
     public class WalkerRepository : IWalkerRepository
     {
         private readonly IConfiguration _config;
+        private NeighborhoodRepository _neighborhoodrepo;
 
         // The constructor accepts an IConfiguration object as a parameter. This class comes from the ASP.NET framework and is useful for retrieving things out of the appsettings.json file like connection strings.
         public WalkerRepository(IConfiguration config)
         {
             _config = config;
+            _neighborhoodrepo= new NeighborhoodRepository(config);
         }
 
         public SqlConnection Connection
@@ -31,8 +33,7 @@ namespace DogGo.Repositories
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"
-                        SELECT w.Id, w.Name AS wName, ImageUrl, NeighborhoodId, n.Name AS NName
-                        FROM Walker w LEFT JOIN Neighborhood n ON w.NeighborhoodId=n.Id
+                        SELECT * FROM Walker
                     ";
 
                     SqlDataReader reader = cmd.ExecuteReader();
@@ -43,14 +44,10 @@ namespace DogGo.Repositories
                         Walker walker = new Walker
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            Name = reader.GetString(reader.GetOrdinal("wName")),
+                            Name = reader.GetString(reader.GetOrdinal("Name")),
                             ImageUrl = reader.GetString(reader.GetOrdinal("ImageUrl")),
                             NeighborhoodId = reader.GetInt32(reader.GetOrdinal("NeighborhoodId")),
-                            Neighborhood= new Neighborhood 
-                            {
-                                Id=reader.GetInt32(reader.GetOrdinal("NeighborhoodId")),
-                                Name=reader.GetString(reader.GetOrdinal("NNAme"))
-                            }
+                            Neighborhood = _neighborhoodrepo.GetNeighborhoodById(reader.GetInt32(reader.GetOrdinal("NeighborhoodId")))
                         };
 
                         walkers.Add(walker);
@@ -71,9 +68,8 @@ namespace DogGo.Repositories
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"
-                        SELECT w.Id, w.Name AS wName, ImageUrl, NeighborhoodId, n.Name AS NName
-                        FROM Walker w LEFT JOIN Neighborhood n ON w.NeighborhoodId=n.Id
-                        WHERE w.Id = @id
+                        SELECT *
+                        FROM Walker WHERE Id = @id
                     ";
 
                     cmd.Parameters.AddWithValue("@id", id);
@@ -85,14 +81,10 @@ namespace DogGo.Repositories
                         Walker walker = new Walker
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            Name = reader.GetString(reader.GetOrdinal("wName")),
+                            Name = reader.GetString(reader.GetOrdinal("Name")),
                             ImageUrl = reader.GetString(reader.GetOrdinal("ImageUrl")),
                             NeighborhoodId = reader.GetInt32(reader.GetOrdinal("NeighborhoodId")),
-                            Neighborhood = new Neighborhood
-                            {
-                                Id = reader.GetInt32(reader.GetOrdinal("NeighborhoodId")),
-                                Name = reader.GetString(reader.GetOrdinal("NNAme"))
-                            }
+                            Neighborhood = _neighborhoodrepo.GetNeighborhoodById(reader.GetInt32(reader.GetOrdinal("NeighborhoodId")))
                         };
 
                         reader.Close();
