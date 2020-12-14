@@ -213,5 +213,44 @@ namespace DogGo.Repositories
                 }
             }
         }
+
+        public List<Owner> GetOwnersSortedByName()
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"SELECT o.Id AS ownerId, Email, o.Name AS ownerName, 
+                                        Address, NeighborhoodId, Phone, 
+                                        n.Name AS neighborhoodName FROM Owner o 
+                                        LEFT JOIN Neighborhood n 
+                                        ON o.neighborhoodId=n.Id
+                                        ORDER BY ownerName";
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    List<Owner> owners = new List<Owner>();
+                    while (reader.Read())
+                    {
+                        Owner owner = new Owner
+                        {
+                            id = reader.GetInt32(reader.GetOrdinal("ownerId")),
+                            Email = reader.GetString(reader.GetOrdinal("Email")),
+                            Name = reader.GetString(reader.GetOrdinal("ownerName")),
+                            Address = reader.GetString(reader.GetOrdinal("Address")),
+                            NeighborhoodId = reader.GetInt32(reader.GetOrdinal("NeighborhoodId")),
+                            Phone = reader.GetString(reader.GetOrdinal("Phone")),
+                            Neighborhood = new Neighborhood
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("NeighborhoodId")),
+                                Name = reader.GetString(reader.GetOrdinal("neighborhoodName"))
+                            }
+                        };
+                        owners.Add(owner);
+                    }
+                    reader.Close();
+                    return owners;
+                }
+            }
+        }
     }
 }

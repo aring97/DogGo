@@ -95,8 +95,8 @@ namespace DogGo.Repositories
                     cmd.Parameters.AddWithValue("@name", dog.Name);
                     cmd.Parameters.AddWithValue("@ownerId", dog.OwnerId);
                     cmd.Parameters.AddWithValue("@breed", dog.Breed);
-                    cmd.Parameters.AddWithValue("@notes", dog.Notes);
-                    cmd.Parameters.AddWithValue("@imageUrl", dog.Notes);
+                    cmd.Parameters.AddWithValue("@notes", Utilities.ReaderUtil.GetNullParam(dog.Notes));
+                    cmd.Parameters.AddWithValue("@imageUrl", Utilities.ReaderUtil.GetNullParam(dog.ImageUrl));
                     int id = (int)cmd.ExecuteScalar();
                     dog.Id = id;
                 }

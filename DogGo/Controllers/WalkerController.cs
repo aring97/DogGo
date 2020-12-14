@@ -6,17 +6,24 @@ using System.Linq;
 using System.Threading.Tasks;
 using DogGo.Repositories;
 using DogGo.Models;
+using DogGo.Models.ViewModels;
 
 namespace DogGo.Controllers
 {
     public class WalkerController : Controller
     {
         private readonly IWalkerRepository _walkerRepo;
+        private readonly IWalksRepository _walksRepo;
+        private readonly IDogRepository _dogRepo;
+        private readonly IOwnerRepository _ownerRepo;
 
         // ASP.NET will give us an instance of our Walker Repository. This is called "Dependency Injection"
-        public WalkerController(IWalkerRepository walkerRepository)
+        public WalkerController(IWalkerRepository walkerRepository, IWalksRepository walksRepository, IDogRepository dogRepository, IOwnerRepository ownerRepository)
         {
             _walkerRepo = walkerRepository;
+            _walksRepo = walksRepository;
+            _dogRepo = dogRepository;
+            _ownerRepo = ownerRepository;
         }
         // GET: WalkerController
         public ActionResult Index()
@@ -33,7 +40,39 @@ namespace DogGo.Controllers
             {
                 return NotFound();
             }
-            return View(walker);
+            List < Walks > unsortedWalks= _walksRepo.GetWalksByWalkerId(id);
+            List<Dog> unsortedDogs = _dogRepo.GetAllDogs();
+            List<Owner> sortedOwners = _ownerRepo.GetOwnersSortedByName();
+            List<Dog> sortedDogs = new List<Dog>();
+            List<Walks> sortedWalks = new List<Walks>();
+            foreach(Owner owner in sortedOwners)
+            {
+                foreach(Dog dog in unsortedDogs)
+                {
+                    if (dog.OwnerId == owner.id)
+                    {
+                        sortedDogs.Add(dog);
+                    }
+                }
+            }
+            foreach( Dog dog in sortedDogs)
+            {
+                foreach(Walks walk in unsortedWalks)
+                {
+                    if (dog.Id == walk.DogId)
+                    {
+                        sortedWalks.Add(walk);
+                    }
+                }
+            }
+
+            WalkerProfileViewModel vm = new WalkerProfileViewModel
+            {
+                Walker = walker,
+                Walk=sortedWalks,
+                Owner=sortedOwners
+            };
+            return View(vm);
         }
 
         // GET: WalkerController/Create
