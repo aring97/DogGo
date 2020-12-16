@@ -45,6 +45,8 @@ namespace DogGo.Controllers
             List<Owner> sortedOwners = _ownerRepo.GetOwnersSortedByName();
             List<Dog> sortedDogs = new List<Dog>();
             List<Walks> sortedWalks = new List<Walks>();
+            List<Owner> relaventOwners = new List<Owner>();
+            List<Dog> relaventDogs = new List<Dog>();
             foreach(Owner owner in sortedOwners)
             {
                 foreach(Dog dog in unsortedDogs)
@@ -65,12 +67,31 @@ namespace DogGo.Controllers
                     }
                 }
             }
-
+            foreach(Walks walk in sortedWalks)
+            {
+                foreach(Dog dog in sortedDogs)
+                {
+                    if (walk.DogId == dog.Id)
+                    {
+                        relaventDogs.Add(dog);
+                    }
+                }
+            }
+            foreach(Dog dog in relaventDogs)
+            {
+                foreach(Owner owner in sortedOwners)
+                {
+                    if (dog.OwnerId == owner.id)
+                    {
+                        relaventOwners.Add(owner);
+                    }
+                }
+            }
             WalkerProfileViewModel vm = new WalkerProfileViewModel
             {
                 Walker = walker,
                 Walk=sortedWalks,
-                Owner=sortedOwners
+                Owner=relaventOwners
             };
             return View(vm);
         }
