@@ -1,4 +1,5 @@
 ﻿using DogGo.Models;
+using DogGo.Repositories.Utilities;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
@@ -82,7 +83,7 @@ namespace DogGo.Repositories
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
                             Name = reader.GetString(reader.GetOrdinal("Name")),
-                            ImageUrl = reader.GetString(reader.GetOrdinal("ImageUrl")),
+                            ImageUrl = ReaderUtil.GetNullableString( reader,"ImageUrl"),
                             NeighborhoodId = reader.GetInt32(reader.GetOrdinal("NeighborhoodId")),
                             Neighborhood = _neighborhoodrepo.GetNeighborhoodById(reader.GetInt32(reader.GetOrdinal("NeighborhoodId")))
                         };
@@ -124,6 +125,7 @@ namespace DogGo.Repositories
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
                             Name = reader.GetString(reader.GetOrdinal("Name")),
                             ImageUrl = reader.GetString(reader.GetOrdinal("ImageUrl")),
+                            Neighborhood = _neighborhoodrepo.GetNeighborhoodById(reader.GetInt32(reader.GetOrdinal("NeighborhoodId"))),
                             NeighborhoodId = reader.GetInt32(reader.GetOrdinal("NeighborhoodId"))
                         };
 

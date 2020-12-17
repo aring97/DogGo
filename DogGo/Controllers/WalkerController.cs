@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using DogGo.Repositories;
 using DogGo.Models;
 using DogGo.Models.ViewModels;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace DogGo.Controllers
 {
@@ -28,8 +30,18 @@ namespace DogGo.Controllers
         // GET: WalkerController
         public ActionResult Index()
         {
-            List<Walker> walkers = _walkerRepo.GetAllWalkers(); 
-            return View(walkers);
+            int currentOwnerId = GetCurrentUserId();
+            if (currentOwnerId > 0)
+            {
+                Owner owner = _ownerRepo.GetOwnerById(currentOwnerId);
+                List<Walker> walkers = _walkerRepo.GetWalkersInNeighborhood(owner.NeighborhoodId);
+                return View(walkers);
+            }
+            else
+            {
+                List<Walker> walkers = _walkerRepo.GetAllWalkers();
+                return View(walkers);
+            }
         }
 
         // GET: WalkerController/Details/5
@@ -106,10 +118,21 @@ namespace DogGo.Controllers
                 return View();
             }
         }
-
+        private int GetCurrentUserId()
+        {
+            try 
+            { 
+            string id = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            return int.Parse(id);
+            }
+            catch (ArgumentNullException)
+            {
+                return 0;
+            }
+        }
         private WalkerProfileViewModel createViewModel(int walkerId, Walker walker)
         {
-            List<Walks> unsortedWalks = _walksRepo.GetWalksByWalkerId(id);
+            List<Walks> unsortedWalks = _walksRepo.GetWalksByWalkerId(walkerId);
             List<Dog> unsortedDogs = _dogRepo.GetAllDogs();
             List<Owner> sortedOwners = _ownerRepo.GetOwnersSortedByName();
             List<Dog> sortedDogs = new List<Dog>();
